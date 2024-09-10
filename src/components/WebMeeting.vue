@@ -18,11 +18,23 @@
 import { DailyCall, DailyEventObjectBase } from "@daily-co/daily-js";
 import { ref, defineProps, onMounted, defineEmits, onUnmounted } from "vue";
 import DailyIframe from "@daily-co/daily-js";
+import { useRoute } from "vue-router";
 
-const props = defineProps<{ roomUrl: string; username: string }>();
+const props = defineProps({
+  roomUrl: {
+    type: String,
+    default: "https://jettonn.daily.co/FrLilHfEtSjbs9HGpS27",
+  },
+  username: {
+    type: String,
+    default: "",
+  },
+});
 const emit = defineEmits(["endMeeting"]);
+const route = useRoute();
 const videoDiv = ref(null);
 const isMeetingLoading = ref(true);
+const username = ref("");
 let callFrame: DailyCall | null = null;
 
 async function setupDailyCo() {
@@ -36,7 +48,8 @@ async function setupDailyCo() {
     return;
   }
 
-  if (!props.username) {
+  console.log("🚀 ~ setupDailyCo ~ username.value:", username.value);
+  if (!username.value) {
     alert("Please enter a username");
     return;
   }
@@ -86,7 +99,7 @@ async function setupDailyCo() {
 
     await callFrame.join({
       url: props.roomUrl,
-      userName: props.username,
+      userName: username.value,
     });
   } catch (err) {
     console.log("Got exception setting up daily", err);
@@ -110,6 +123,11 @@ function getDailyFrame() {
 }
 
 onMounted(() => {
+  if (route.path === "/conv") {
+    username.value = route.query.username as string;
+  } else {
+    username.value = props.username;
+  }
   setupDailyCo().then(() => {
     isMeetingLoading.value = false;
   });

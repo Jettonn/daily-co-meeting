@@ -15,7 +15,11 @@ import {
   defineEmits,
 } from "vue";
 
-const props = defineProps<{ modelValue: boolean }>();
+const props = defineProps<{
+  modelValue: boolean;
+  noUrl: boolean;
+  username: string;
+}>();
 const emit = defineEmits(["update:modelValue"]);
 
 let windowRef: Window | null = null;
@@ -55,7 +59,11 @@ function openWindow() {
       const windowOptions =
         "menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=yes,width=800,height=600";
 
-      windowRef = window.open("", "meeting-window", windowOptions);
+      windowRef = window.open(
+        !props.noUrl ? "" : "/conv?username=" + props.username,
+        "meeting-window",
+        windowOptions
+      );
       if (!windowRef || !portal.value) return;
       windowLoaded.value = true;
       windowRef.document.body.append(portal.value);
